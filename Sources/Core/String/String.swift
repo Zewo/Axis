@@ -51,11 +51,11 @@ extension String {
 
             case plusCharacter:
                 decodedData.append(spaceCharacter)
-                i++
+                i += 1
 
             default:
                 decodedData.append(currentCharacter)
-                i++
+                i += 1
             }
         }
 
