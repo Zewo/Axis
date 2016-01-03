@@ -70,9 +70,10 @@ public class DefaultJSONSerializer: JSONSerializer {
 
         for entry in o {
             s += "\(escapeAsJSONString(entry.0)):\(entry.1.serialize(self))"
-            if i++ != (o.count - 1) {
+            if i != (o.count - 1) {
                 s += ","
             }
+            i += 1
         }
 
         return s + "}"
@@ -84,7 +85,7 @@ public final class PrettyJSONSerializer: DefaultJSONSerializer {
 
     override public func serializeArray(a: [JSON]) -> String {
         var s = "["
-        indentLevel++
+        indentLevel += 1
 
         for i in 0 ..< a.count {
             s += "\n"
@@ -96,13 +97,13 @@ public final class PrettyJSONSerializer: DefaultJSONSerializer {
             }
         }
 
-        indentLevel--
+        indentLevel -= 1
         return s + "\n" + indent() + "]"
     }
 
     override public func serializeObject(o: [String: JSON]) -> String {
         var s = "{"
-        indentLevel++
+        indentLevel += 1
         var i = 0
 
         var keys = Array(o.keys)
@@ -113,12 +114,13 @@ public final class PrettyJSONSerializer: DefaultJSONSerializer {
             s += indent()
             s += "\(escapeAsJSONString(key)): \(o[key]!.serialize(self))"
 
-            if i++ != (o.count - 1) {
+            if i != (o.count - 1) {
                 s += ","
             }
+            i += 1
         }
 
-        indentLevel--
+        indentLevel -= 1
         return s + "\n" + indent() + "}"
     }
 

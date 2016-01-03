@@ -57,7 +57,7 @@ private class Base64Encoder {
 
 	func encodeBlock() {
 		let fragment = bytes[offset]
-		offset++
+		offset += 1
 
 		switch step {
 		case .A:
@@ -76,7 +76,7 @@ private class Base64Encoder {
 			result  = (fragment & 0x03f) >> 0
 			output.append(encodeValue(result))
 			if let charsPerLine = self.charsPerLine {
-				stepcount++
+				stepcount += 1
 				if stepcount == charsPerLine/4 {
 					output.append(Base64Encoder.newlineChar)
 					stepcount = 0
@@ -142,7 +142,8 @@ private class Base64Decoder {
 		var tmpFragment: Int8
 		repeat {
 			guard offset < bytes.count else { return }
-			let byte = bytes[offset++]
+			let byte = bytes[offset]
+			offset += 1
 			tmpFragment = Base64Decoder.decodeValue(byte)
 		} while (tmpFragment < 0)
 		let fragment = UInt8(bitPattern: tmpFragment)
@@ -152,15 +153,18 @@ private class Base64Decoder {
 			output[outputOffset]	 = (fragment & 0x03f) << 2
 			step = .B
 		case .B:
-			output[outputOffset++]	|= (fragment & 0x030) >> 4
+			output[outputOffset]	|= (fragment & 0x030) >> 4
+			outputOffset += 1
 			output[outputOffset]	 = (fragment & 0x00f) << 4
 			step = .C
 		case .C:
-			output[outputOffset++]	|= (fragment & 0x03c) >> 2
+			output[outputOffset]	|= (fragment & 0x03c) >> 2
+			outputOffset += 1
 			output[outputOffset]	 = (fragment & 0x003) << 6
 			step = .D
 		case .D:
-			output[outputOffset++]	|= (fragment & 0x03f)
+			output[outputOffset]	|= (fragment & 0x03f)
+			outputOffset += 1
 			step = .A
 		}
 
