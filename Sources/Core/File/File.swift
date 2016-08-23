@@ -28,6 +28,7 @@
 	import Darwin.C
 #endif
 
+
 public class File {
 	
 	public enum Error: ErrorType {
@@ -55,6 +56,43 @@ public class File {
 	deinit {
 		close()
 	}
+    
+    public class func contentsOfDirectoryAtPath(path: String) throws -> [String] {
+        var contents: [String] = []
+        
+        let dir = opendir(path)
+        
+        if dir == nil {
+            throw Error.OpenError("Could not open directory at \(path)")
+        }
+        
+        defer {
+            closedir(dir)
+        }
+        
+        let excludeNames = [".", ".."]
+        
+        var entry: UnsafeMutablePointer<dirent> = readdir(dir)
+        
+        while entry != nil {
+            if let entryName = withUnsafePointer(&entry.memory.d_name, { (ptr) -> String? in
+                let int8Ptr = unsafeBitCast(ptr, UnsafePointer<Int8>.self)
+                return String.fromCString(int8Ptr)
+            }) {
+                
+                guard !excludeNames.contains(entryName) else {
+                    continue
+                }
+                
+                // TODO: `entryName` should be limited in length to `entry.memory.d_namlen`.
+                contents.append(entryName)
+            }
+            
+            entry = readdir(dir)
+        }
+        
+        return contents
+    }
 	
 	public func write(data: Data) throws {
 		let count = fwrite(data.uBytes, 1, data.length, fp)
